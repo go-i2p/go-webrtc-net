@@ -9,7 +9,7 @@ import (
 )
 
 // Close implements net.PacketConn.
-func (p *packetConn) Close() error {
+func (p *RTCPacketConn) Close() error {
 	p.cancel()
 	if p.dc != nil {
 		if err := p.dc.Close(); err != nil {
@@ -23,12 +23,12 @@ func (p *packetConn) Close() error {
 }
 
 // LocalAddr implements net.PacketConn.
-func (p *packetConn) LocalAddr() net.Addr {
+func (p *RTCPacketConn) LocalAddr() net.Addr {
 	return p.localAddr
 }
 
 // ReadFrom implements net.PacketConn.
-func (p *packetConn) ReadFrom(b []byte) (n int, addr net.Addr, err error) {
+func (p *RTCPacketConn) ReadFrom(b []byte) (n int, addr net.Addr, err error) {
 	select {
 	case <-p.ctx.Done():
 		return 0, nil, p.ctx.Err()
@@ -39,7 +39,7 @@ func (p *packetConn) ReadFrom(b []byte) (n int, addr net.Addr, err error) {
 }
 
 // SetDeadline implements net.PacketConn.
-func (p *packetConn) SetDeadline(t time.Time) error {
+func (p *RTCPacketConn) SetDeadline(t time.Time) error {
 	err1 := p.SetReadDeadline(t)
 	err2 := p.SetWriteDeadline(t)
 	if err1 != nil {
@@ -49,7 +49,7 @@ func (p *packetConn) SetDeadline(t time.Time) error {
 }
 
 // SetReadDeadline implements net.PacketConn.
-func (p *packetConn) SetReadDeadline(t time.Time) error {
+func (p *RTCPacketConn) SetReadDeadline(t time.Time) error {
 	if p.readDeadline == nil {
 		p.readDeadline = make(chan time.Time, 1)
 	}
@@ -63,7 +63,7 @@ func (p *packetConn) SetReadDeadline(t time.Time) error {
 }
 
 // SetWriteDeadline implements net.PacketConn.
-func (p *packetConn) SetWriteDeadline(t time.Time) error {
+func (p *RTCPacketConn) SetWriteDeadline(t time.Time) error {
 	if p.writeDeadline == nil {
 		p.writeDeadline = make(chan time.Time, 1)
 	}
@@ -77,7 +77,7 @@ func (p *packetConn) SetWriteDeadline(t time.Time) error {
 }
 
 // WriteTo implements net.PacketConn.
-func (p *packetConn) WriteTo(b []byte, addr net.Addr) (n int, err error) {
+func (p *RTCPacketConn) WriteTo(b []byte, addr net.Addr) (n int, err error) {
 	if p.dc == nil || p.dc.ReadyState() != webrtc.DataChannelStateOpen {
 		return 0, net.ErrClosed
 	}
@@ -110,7 +110,7 @@ func DialPacketConn(pconn net.PacketConn, raddr string) (net.PacketConn, error) 
 		return nil, err
 	}
 
-	p := &packetConn{
+	p := &RTCPacketConn{
 		pc:        pc,
 		localAddr: pconn.LocalAddr(),
 		ctx:       ctx,

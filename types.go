@@ -15,8 +15,8 @@ var (
 	ErrInvalidAddress   = errors.New("invalid address")
 )
 
-// conn implements net.Conn over WebRTC
-type conn struct {
+// RTCConn implements net.Conn over WebRTC
+type RTCConn struct {
 	dc         *webrtc.DataChannel
 	pc         *webrtc.PeerConnection
 	localAddr  net.Addr
@@ -28,8 +28,8 @@ type conn struct {
 	cancel     context.CancelFunc
 }
 
-// packetConn implements net.PacketConn over WebRTC
-type packetConn struct {
+// RTCPacketConn implements net.PacketConn over WebRTC
+type RTCPacketConn struct {
 	pc            *webrtc.PeerConnection
 	dc            *webrtc.DataChannel
 	localAddr     net.Addr
@@ -42,8 +42,8 @@ type packetConn struct {
 	writeDeadline chan time.Time
 }
 
-// listener implements net.Listener over WebRTC
-type listener struct {
+// RTCListener implements net.Listener over WebRTC
+type RTCListener struct {
 	underlying net.Listener
 	config     *webrtc.Configuration
 	mu         sync.RWMutex

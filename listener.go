@@ -11,11 +11,11 @@ import (
 func Listen(lstn net.Listener) (net.Listener, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	l := &listener{
+	l := &RTCListener{
 		underlying: lstn,
 		config: &webrtc.Configuration{
 			ICEServers: []webrtc.ICEServer{
-				{URLs: []string{"stun:stun.l.google.com:19302"}},
+				{URLs: STUN_SERVER_URLS},
 			},
 		},
 		acceptChan: make(chan net.Conn),
@@ -27,7 +27,7 @@ func Listen(lstn net.Listener) (net.Listener, error) {
 	return l, nil
 }
 
-func (l *listener) Accept() (net.Conn, error) {
+func (l *RTCListener) Accept() (net.Conn, error) {
 	select {
 	case conn := <-l.acceptChan:
 		return conn, nil
@@ -36,7 +36,7 @@ func (l *listener) Accept() (net.Conn, error) {
 	}
 }
 
-func (l *listener) Close() error {
+func (l *RTCListener) Close() error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -49,11 +49,11 @@ func (l *listener) Close() error {
 	return l.underlying.Close()
 }
 
-func (l *listener) Addr() net.Addr {
+func (l *RTCListener) Addr() net.Addr {
 	return l.underlying.Addr()
 }
 
-func (l *listener) acceptLoop() {
+func (l *RTCListener) acceptLoop() {
 	for {
 		conn, err := l.underlying.Accept()
 		if err != nil {
