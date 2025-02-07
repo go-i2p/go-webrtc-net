@@ -2,6 +2,7 @@ package webrtc
 
 import (
 	"context"
+	"encoding/json"
 	"net"
 	"time"
 
@@ -119,4 +120,44 @@ func (c *RTCConn) SetReadDeadline(t time.Time) error {
 func (c *RTCConn) SetWriteDeadline(t time.Time) error {
 	// Implementation using context deadline for writes
 	return nil
+}
+
+func (c *RTCConn) handleSignaling(conn net.Conn) {
+	// Basic signaling implementation
+	offer, err := c.pc.CreateOffer(nil)
+	if err != nil {
+		return
+	}
+	err = c.pc.SetLocalDescription(offer)
+	if err != nil {
+		return
+	}
+	// Send offer and handle answer through the provided connection
+	// Send offer
+	offerBytes, err := json.Marshal(offer)
+	if err != nil {
+		return
+	}
+	_, err = conn.Write(offerBytes)
+	if err != nil {
+		return
+	}
+
+	// Read answer
+	answerBytes := make([]byte, 8192)
+	n, err := conn.Read(answerBytes)
+	if err != nil {
+		return
+	}
+
+	var answer webrtc.SessionDescription
+	err = json.Unmarshal(answerBytes[:n], &answer)
+	if err != nil {
+		return
+	}
+
+	err = c.pc.SetRemoteDescription(answer)
+	if err != nil {
+		return
+	}
 }
