@@ -1,6 +1,6 @@
 module github.com/go-i2p/go-webrtc-net
 
-go 1.26.0
+go 1.26.3
 
 require github.com/pion/webrtc/v3 v3.3.6
 
@@ -28,6 +28,7 @@ require (
 	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/time v0.16.0 // indirect
 )
 
 retract (
